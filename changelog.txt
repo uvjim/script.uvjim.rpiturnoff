@@ -1,0 +1,16 @@
+[B]Version 0.0.5[/B]
+- Fix: Bumped Python version to fall inline with Gotham release
+
+[B]Version 0.0.4[/B]
+- New: Added debug logging
+- Info: Small code tidy
+
+[B]Version 0.0.3[/B]
+- Fixed: Icon was brought in line with other uvjim add-ons
+
+[B]Version 0.0.2[/B]
+- Fixed: Second call to script was failing
+- New: Add language support
+
+[B]Version 0.0.1[/B]
+- Initial Release

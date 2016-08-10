@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<strings>  
+  <!-- Dialogs -->
+  <string id="32070">Alarm Status</string>
+  <string id="32071">%s left for timer</string>
+  
+  <!-- Miscellaneous Strings -->
+  <string id="32998">OK</string>
+  <string id="32999">Cancel Alarm</string>
+</strings>

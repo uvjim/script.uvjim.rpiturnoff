@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.uvjim.rpiturnoff" name="uvjim RPi Turn Off" version="0.0.5" provider-name="uvjim">
+    <requires>
+      <import addon="xbmc.python" version="2.1.0"/>
+    </requires>
+    <extension point="xbmc.python.script" library="default.py" />
+    <extension point="xbmc.addon.metadata">
+      <platform>all</platform>
+      <summary lang="en">Allows you to stop the XBMC player and return to the Home screen</summary>
+      <disclaimer></disclaimer>
+      <description lang="en"></description>
+      <website></website>
+      <source></source>
+      <forum></forum>
+      <email></email>
+    </extension>
+</addon>
