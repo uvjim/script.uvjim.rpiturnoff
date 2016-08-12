@@ -12,6 +12,7 @@ if __name__ == "__main__":
     alarmName = 'shutdowntimer'
     blnSet = False
     blnHasAlarm = xbmc.getCondVisibility('System.HasAlarm(%s)' % alarmName)
+    logger.write('Timer already set: {}'.format(blnHasAlarm))
     if blnHasAlarm == 0:
       if len(sys.argv) - 1 > 0:
         if sys.argv[1] == 'true':
