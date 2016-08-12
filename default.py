@@ -12,20 +12,23 @@ if __name__ == "__main__":
         action = args.get('action', '')
         if action != '': action = action[0]
 
-    language = xbmcaddon.Addon().getLocalizedString
-    alarm = Alarm(name='uvjim.rpiturnoff', friendly='Sleep timer')
-    if xbmc.Player().isPlaying():
-        if action == 'queryset':
-            if not alarm.isSet():
-                alarm.set()
-            else:
-                aRemaining = alarm.getTimeLeft()
-                if aRemaining > 60:
-                    aRemaining = int(aRemaining / 60)
-                    aUnits = language(32073)
+    if action == '':
+        xbmcaddon.Addon().openSettings()
+    else:
+        language = xbmcaddon.Addon().getLocalizedString
+        alarm = Alarm(name='uvjim.rpiturnoff', friendly='Sleep timer')
+        if xbmc.Player().isPlaying():
+            if action == 'queryset':
+                if not alarm.isSet():
+                    alarm.set()
                 else:
-                    aUnits = language(32074)
-                ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format('{} {}'.format(aRemaining, aUnits)), nolabel=language(32998), yeslabel=language(32999))
-                if ans: alarm.cancel()
-        elif action == 'expired':
-            alarm.expired()
+                    aRemaining = alarm.getTimeLeft()
+                    if aRemaining > 60:
+                        aRemaining = int(aRemaining / 60)
+                        aUnits = language(32073)
+                    else:
+                        aUnits = language(32074)
+                    ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format('{} {}'.format(aRemaining, aUnits)), nolabel=language(32998), yeslabel=language(32999))
+                    if ans: alarm.cancel()
+            elif action == 'expired':
+                alarm.expired()

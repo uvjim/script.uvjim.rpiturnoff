@@ -53,6 +53,7 @@ class Alarm:
     def __init__(self, name, friendly):
         self.name = name
         self.friendly = friendly
+        self.settings = xbmcaddon.Addon().getSetting
 
     def _doAction(self):
         logger.write('Stopping the current player')
@@ -73,7 +74,8 @@ class Alarm:
             logger.write('{} created: {}'.format(self.name, ret))
             if ret:
                 xbmc.executebuiltin('XBMC.AlarmClock({0}, XBMC.RunScript("{1}", "action=expired&name={0}"), "{2}:00", silent)'.format(self.name, xbmcaddon.Addon().getAddonInfo('id'), timeout))
-                xbmcgui.Dialog().notification('{} has been set for {} minutes'.format(self.friendly, timeout), xbmcaddon.Addon().getAddonInfo('id'))
+                if self.settings('notifications.start') == 'true':
+                    xbmcgui.Dialog().notification('{} has been set for {} minutes'.format(self.friendly, timeout), xbmcaddon.Addon().getAddonInfo('id'))
         else:
             logger.write('User cancelled setting alarm')
             ret = False
@@ -83,7 +85,7 @@ class Alarm:
         logger.write('Cancelling {}'.format(self.name))
         xbmc.executebuiltin('XBMC.CancelAlarm({}, silent)'.format(self.name))
         timer = AlarmStore.get(self.name)
-        if timer: xbmcgui.Dialog().notification('{} has been cancelled'.format(timer['friendly']), xbmcaddon.Addon().getAddonInfo('id'))
+        if timer and self.settings('notifications.cancel') == 'true': xbmcgui.Dialog().notification('{} has been cancelled'.format(timer['friendly']), xbmcaddon.Addon().getAddonInfo('id'))
         AlarmStore.unset(self.name)
 
     def isSet(self, log=True):
