@@ -81,10 +81,10 @@ class Alarm:
 
     def cancel(self):
         logger.write('Cancelling {}'.format(self.name))
-        AlarmStore.unset(self.name)
         xbmc.executebuiltin('XBMC.CancelAlarm({}, silent)'.format(self.name))
         timer = AlarmStore.get(self.name)
         if timer: xbmcgui.Dialog().notification('{} has been cancelled'.format(timer['friendly']), xbmcaddon.Addon().getAddonInfo('id'))
+        AlarmStore.unset(self.name)
 
     def isSet(self, log=True):
         if log: logger.write('Checking for {}'.format(self.name))
