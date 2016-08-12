@@ -1,3 +1,6 @@
+[B]Version 0.0.7[/B]
+- Fix: An issue with the notification not being shown when the sleep timer was cancelled
+
 [B]Version 0.0.6[/B]
 - New: Class built for handling the sleep timer alarm
 - New: Enhanced logging
