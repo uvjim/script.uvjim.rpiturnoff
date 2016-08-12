@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<strings>  
+<strings>
   <!-- Dialogs -->
   <string id="32070">Alarm Status</string>
-  <string id="32071">%s left for timer</string>
-  
+  <string id="32071">{} left for timer</string>
+  <string id="32072">Enter the number of minutes</string>
+  <string id="32073">minutes</string>
+  <string id="32074">seconds</string>
+
   <!-- Miscellaneous Strings -->
   <string id="32998">OK</string>
   <string id="32999">Cancel Alarm</string>
