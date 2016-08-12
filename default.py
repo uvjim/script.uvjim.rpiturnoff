@@ -1,35 +1,31 @@
 ﻿import sys
-import xbmc
-import xbmcgui
-import xbmcaddon
+import urlparse
+import xbmcgui, xbmcaddon
+from resources.lib.alarm import Alarm
 import resources.lib.logger as logger
 
 if __name__ == "__main__":
-  settings = xbmcaddon.Addon(id='script.uvjim.rpiturnoff')
-  language = settings.getLocalizedString
+    logger.write('Arguments: {}'.format(sys.argv))
+    action = ''
+    if len(sys.argv) > 1:
+        args = urlparse.parse_qs(sys.argv[1])
+        action = args.get('action', '')
+        if action != '': action = action[0]
 
-  if xbmc.Player().isPlaying():
-    alarmName = 'shutdowntimer'
-    blnSet = False
-    blnHasAlarm = xbmc.getCondVisibility('System.HasAlarm(%s)' % alarmName)
-    logger.write('Timer already set: {}'.format(blnHasAlarm))
-    if blnHasAlarm == 0:
-      if len(sys.argv) - 1 > 0:
-        if sys.argv[1] == 'true':
-          logger.write('Stopping the current player')
-          xbmc.executebuiltin('XBMC.PlayerControl(Stop)')
-          logger.write('Returning to the home window')
-          xbmc.executebuiltin('XBMC.ActivateWindow(Home)')
-        else:
-          blnSet = True
-      else:
-        blnSet = True
-      if blnSet:
-        logger.write('Setting the timer')
-        xbmc.executebuiltin('XBMC.AlarmClock(%s, XBMC.RunScript("%s", true))' % (alarmName, settings.getAddonInfo('id')))
-    else:
-      if xbmc.getCondVisibility('System.AlarmLessOrEqual(%s, 1)' % alarmName) == 0:
-        dialog = xbmcgui.Dialog()
-        if dialog.yesno(language(32070), language(32071) % xbmc.getInfoLabel('System.AlarmPos'), nolabel=language(32998), yeslabel=language(32999)):
-          logger.write('Cancelling the timer')
-          xbmc.executebuiltin('XBMC.CancelAlarm(%s, false)' % alarmName)
+    language = xbmcaddon.Addon().getLocalizedString
+    alarm = Alarm(name='uvjim.rpiturnoff', friendly='Sleep timer')
+    if xbmc.Player().isPlaying():
+        if action == 'queryset':
+            if not alarm.isSet():
+                alarm.set()
+            else:
+                aRemaining = alarm.getTimeLeft()
+                if aRemaining > 60:
+                    aRemaining = int(aRemaining / 60)
+                    aUnits = language(32073)
+                else:
+                    aUnits = language(32074)
+                ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format('{} {}'.format(aRemaining, aUnits)), nolabel=language(32998), yeslabel=language(32999))
+                if ans: alarm.cancel()
+        elif action == 'expired':
+            alarm.expired()
