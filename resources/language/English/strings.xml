@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <strings>
-  <!-- Dialogs -->
-  <string id="32070">Alarm Status</string>
-  <string id="32071">{} left for timer</string>
-  <string id="32072">Enter the number of minutes</string>
-  <string id="32073">minutes</string>
-  <string id="32074">seconds</string>
+	<!-- Settings -->
+	<string id="30000">Notifications</string>
+	<string id="30001">Show on timer start</string>
+	<string id="30002">Show on timer cancel</string>
 
-  <!-- Miscellaneous Strings -->
-  <string id="32998">OK</string>
-  <string id="32999">Cancel Alarm</string>
+	<!-- Dialogs -->
+	<string id="32070">Alarm Status</string>
+	<string id="32071">{} left for timer</string>
+	<string id="32072">Enter the number of minutes</string>
+	<string id="32073">minutes</string>
+	<string id="32074">seconds</string>
+
+	<!-- Miscellaneous Strings -->
+	<string id="32998">OK</string>
+	<string id="32999">Cancel Alarm</string>
 </strings>
