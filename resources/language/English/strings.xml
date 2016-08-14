@@ -4,6 +4,13 @@
 	<string id="30000">Notifications</string>
 	<string id="30001">Show on timer start</string>
 	<string id="30002">Show on timer cancel</string>
+	<string id="30003">Show on timer duration left</string>
+	<string id="30004">- Time left</string>
+	<string id="30005">- Units</string>
+
+	<!-- Units -->
+	<string id="30040">Mins</string>
+	<string id="30041">Percent</string>
 
 	<!-- Dialogs -->
 	<string id="32070">Alarm Status</string>
