@@ -13,11 +13,13 @@
 	<string id="30041">Percent</string>
 
 	<!-- Dialogs -->
-	<string id="32070">Alarm Status</string>
+	<string id="32070">Sleep timer</string>
 	<string id="32071">{} left for timer</string>
 	<string id="32072">Enter the number of minutes</string>
 	<string id="32073">minutes</string>
 	<string id="32074">seconds</string>
+	<string id="32075">Set for</string>
+	<string id="32076">has been cancelled</string>
 
 	<!-- Miscellaneous Strings -->
 	<string id="32998">OK</string>

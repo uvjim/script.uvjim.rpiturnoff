@@ -74,7 +74,7 @@ class Alarm:
             logger.write('Setting {} for {} minutes'.format(self.name, aTimeout))
             xbmc.executebuiltin('XBMC.AlarmClock({0}, XBMC.RunScript("{1}", "action=expired&name={0}"), "{2}:00", silent)'.format(self.name, xbmcaddon.Addon().getAddonInfo('id'), aTimeout))
             if self.settings('notifications.start') == 'true':
-                xbmcgui.Dialog().notification('{} has been set for {} minutes'.format(self.friendly, aTimeout), xbmcaddon.Addon().getAddonInfo('id'))
+                xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32075), aTimeout, self.language(32073)))
             aDetails = {'name': self.name, 'reminder': remindername, 'friendly': self.friendly, 'start': int(time.time()), 'timeout': aTimeout * 60}
             ret = AlarmStore.set(aDetails)
             ret = True if not ret else ret[1]
@@ -96,7 +96,7 @@ class Alarm:
         timer = AlarmStore.get(self.name)
         xbmc.executebuiltin('XBMC.CancelAlarm({}, silent)'.format(self.name))
         xbmc.executebuiltin('XBMC.CancelAlarm({}, silent)'.format(timer['reminder']))
-        if timer and self.settings('notifications.cancel') == 'true': xbmcgui.Dialog().notification('{} has been cancelled'.format(timer['friendly']), xbmcaddon.Addon().getAddonInfo('id'))
+        if timer and self.settings('notifications.cancel') == 'true': xbmcgui.Dialog().notification(timer['friendly'], '{} {}'.format(timer['friendly'], self.language(32076)))
         AlarmStore.unset(self.name)
 
     def isSet(self, log=True):
