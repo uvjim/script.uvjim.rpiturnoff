@@ -16,7 +16,7 @@ if __name__ == "__main__":
         xbmcaddon.Addon().openSettings()
     else:
         language = xbmcaddon.Addon().getLocalizedString
-        alarm = Alarm(name='uvjim.rpiturnoff', friendly='Sleep timer')
+        alarm = Alarm(name='uvjim.rpiturnoff', friendly=language(32070))
         if xbmc.Player().isPlaying():
             if action == 'queryset':
                 if not alarm.isSet():
