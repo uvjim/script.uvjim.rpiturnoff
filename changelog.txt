@@ -1,3 +1,7 @@
+[B]Version 0.0.10[/B]
+- New: Allowed some optional settings for the actions when the timer expires
+- Info: Removed the .git* files so they don't go in the release
+
 [B]Version 0.0.9[/B]
 - New: Allowed setting a notification when a predetermined time is left on the timer
 - Info: Tidy up the notification messages (including dialog boxes)
