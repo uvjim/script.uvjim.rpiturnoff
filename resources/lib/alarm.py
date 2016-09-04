@@ -59,10 +59,15 @@ class Alarm:
         self.language = xbmcaddon.Addon().getLocalizedString
 
     def _doAction(self):
-        logger.write('Stopping the current player')
-        xbmc.executebuiltin('XBMC.PlayerControl(Stop)')
-        logger.write('Returning to the home window')
-        xbmc.executebuiltin('XBMC.ActivateWindow(Home)')
+        if self.settings('actions.stopmedia') == 'true':
+            logger.write('Stopping the current player')
+            xbmc.executebuiltin('XBMC.PlayerControl(Stop)')
+        if self.settings('actions.returntohome') == 'true':
+            logger.write('Returning to the home window')
+            xbmc.executebuiltin('XBMC.ActivateWindow(Home)')
+        if self.settings('actions.waitforscreensaver') == 'false':
+            logger.write('Executing CECStandby builtin')
+            xbmc.executebuiltin('XBMC.CECStandby')
         AlarmStore.unset(self.name)
 
     def set(self):

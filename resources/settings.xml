@@ -7,4 +7,9 @@
         <setting label="30004" type="number" id="notifications.duration.value" default="5" enable="eq(-1,true)" />
         <setting label="30005" type="labelenum" id="notifications.duration.unit" lvalues="30040|30041" enable="eq(-2,true)" />
     </category>
+    <category label="30100">
+        <setting label="30101" type="bool" id="actions.stopmedia" default="true" />
+        <setting label="30102" type="bool" id="actions.returntohome" default="true" />
+        <setting label="30103" type="bool" id="actions.waitforscreensaver" default="true" />
+    </category>
 </settings>
