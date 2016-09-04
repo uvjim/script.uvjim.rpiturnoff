@@ -12,6 +12,12 @@
 	<string id="30040">Mins</string>
 	<string id="30041">Percent</string>
 
+	<!-- Actions -->
+	<string id="30100">Actions</string>
+	<string id="30101">Stop media</string>
+	<string id="30102">Return to Home</string>
+	<string id="30103">Wait for screensaver</string>
+
 	<!-- Dialogs -->
 	<string id="32070">Sleep timer</string>
 	<string id="32071">{} left for timer</string>
