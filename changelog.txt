@@ -1,3 +1,8 @@
+[B]Version 0.0.11[/B]
+- New: Allowed the user to specify the window ID that should be returned to when the timer exires
+- Fix: Issue the CECStanby builtin function, if required, before doing any other actions
+- Info: Updated the addon description
+
 [B]Version 0.0.10[/B]
 - New: Allowed some optional settings for the actions when the timer expires
 - Info: Removed the .git* files so they don't go in the release
