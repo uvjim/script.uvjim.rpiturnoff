@@ -65,9 +65,9 @@ class Alarm:
         if self.settings('actions.stopmedia') == 'true':
             logger.write('Stopping the current player')
             xbmc.executebuiltin('XBMC.PlayerControl(Stop)')
-        if self.settings('actions.returntohome') == 'true':
-            logger.write('Returning to the home window')
-            xbmc.executebuiltin('XBMC.ActivateWindow(Home)')
+        if self.settings('actions.returnto') != '':
+            logger.write('Returning to the {}'.format(self.settings('actions.returnto')))
+            xbmc.executebuiltin('XBMC.ActivateWindow({})'.format(self.settings('actions.returnto')))
         AlarmStore.unset(self.name)
 
     def set(self):
