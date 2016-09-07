@@ -9,7 +9,7 @@
     </category>
     <category label="30100">
         <setting label="30101" type="bool" id="actions.stopmedia" default="true" />
-        <setting label="30102" type="bool" id="actions.returntohome" default="true" />
+        <setting label="30102" type="text" id="actions.returnto" default="home" />
         <setting label="30103" type="bool" id="actions.waitforscreensaver" default="true" />
     </category>
 </settings>
