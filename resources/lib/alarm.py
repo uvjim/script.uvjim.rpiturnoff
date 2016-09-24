@@ -125,7 +125,8 @@ class Alarm:
             self.cancel(notify=False)
             extendedby = self.set(extend=(timeLeft / 60))
             if extendedby:
-                xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32079), extendedby, self.language(32073)))
+                if self.settings('notifications.extend') == 'true':
+                    xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32079), extendedby, self.language(32073)))
                 logger.write('Extended {} by {}'.format(self.friendly, extendedby))
 
     def isSet(self, log=True):
