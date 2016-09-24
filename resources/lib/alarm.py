@@ -7,10 +7,22 @@ class AlarmStore:
     Location = xbmcgui.Window(10000)
     PropertyName = 'uvjim.timers'
 
+    ######################################################################
+    #    Aim:        To format the timer details ready for storing
+    #    Params:     details - the details that need formatting
+    #    Returns:    The formatted JSON string
+    ######################################################################
     @staticmethod
     def _format(details):
         return json.dumps([details], separators=(',', ':'))
 
+    ######################################################################
+    #    Aim:        To store the timer details
+    #    Params:     details - the details to store
+    #                update - if True will attempt to update details of
+    #                an existing timer
+    #    Returns:    N/A
+    ######################################################################
     @staticmethod
     def set(details, update=False):
         tostore = None
@@ -27,6 +39,12 @@ class AlarmStore:
         if tostore:
             AlarmStore.Location.setProperty(AlarmStore.PropertyName, tostore)
 
+    ######################################################################
+    #    Aim:        To retrieve the details of the specified timer
+    #    Params:     name - the name of the timer to retrieve details for
+    #                log - False if you don't want the logging to happen
+    #    Returns:    Details of the timer
+    ######################################################################
     @staticmethod
     def get(name, log=True):
         ret = False
@@ -39,6 +57,11 @@ class AlarmStore:
             if log: logger.write('{}: {}'.format(name, ret))
         return ret
 
+    ######################################################################
+    #    Aim:        To remove details of the specified timer
+    #    Params:     name - the name of the timer to remove
+    #    Returns:    N/A
+    ######################################################################
     @staticmethod
     def unset(name):
         timers = AlarmStore.Location.getProperty(AlarmStore.PropertyName)
@@ -49,15 +72,27 @@ class AlarmStore:
         else:
             AlarmStore.Location.clearProperty(AlarmStore.PropertyName)
 
-class Alarm:
+class Alarm(object):
     ReminderSuffix = '-reminder'
 
+    ######################################################################
+    #    Aim:        To intialise the basic details of the timer
+    #    Params:     name - the name of the timer
+    #                friendly - text used to display anything about the
+    #                           timer 
+    #    Returns:    N/A
+    ######################################################################
     def __init__(self, name, friendly):
         self.name = name
         self.friendly = friendly
         self.settings = xbmcaddon.Addon().getSetting
         self.language = xbmcaddon.Addon().getLocalizedString
 
+    ######################################################################
+    #    Aim:        To carry out the actions configured for when the
+    #                timer expires
+    #    Returns:    N/A
+    ######################################################################
     def _doAction(self):
         if self.settings('actions.waitforscreensaver') == 'false':
             logger.write('Executing CECStandby builtin')
@@ -70,35 +105,41 @@ class Alarm:
             xbmc.executebuiltin('XBMC.ActivateWindow({})'.format(self.settings('actions.returnto')))
         AlarmStore.unset(self.name)
 
-    def set(self, extend=0):
+    ######################################################################
+    #    Aim:        To create or extend the timer
+    #    Params:     timeout - the duration of the timer in minutes
+    #                extend - the amount to extend the timer by
+    #    Returns:    True/False
+    ######################################################################
+    def set(self, timeout=0, extend=0):
         ret = None
-        aTimeout = xbmcgui.Dialog().input(self.language(32072), type=xbmcgui.INPUT_NUMERIC)
-        if aTimeout:
-            aTimeout = int(aTimeout) + int(extend)
+        if timeout:
+            timeout = int(timeout) + int(extend)
             remindername = '{}{}'.format(self.name, Alarm.ReminderSuffix)
-            logger.write('Setting {} for {} minutes'.format(self.name, aTimeout))
-            xbmc.executebuiltin('XBMC.AlarmClock({0}, XBMC.RunScript("{1}", "action=expired&name={0}"), "{2}:00", silent)'.format(self.name, xbmcaddon.Addon().getAddonInfo('id'), aTimeout))
+            logger.write('Setting {} for {} minutes'.format(self.name, timeout))
+            xbmc.executebuiltin('XBMC.AlarmClock({0}, XBMC.RunScript("{1}", "action=expired&name={0}"), "{2}:00", silent)'.format(self.name, xbmcaddon.Addon().getAddonInfo('id'), timeout))
             if self.settings('notifications.start') == 'true' and extend == 0:
-                xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32075), aTimeout, self.language(32073)))
-            aDetails = {'name': self.name, 'reminder': remindername, 'friendly': self.friendly, 'start': int(time.time()), 'timeout': aTimeout * 60}
+                xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32075), timeout, self.language(32073)))
+            aDetails = {'name': self.name, 'reminder': remindername, 'friendly': self.friendly, 'start': int(time.time()), 'timeout': timeout * 60}
             ret = AlarmStore.set(aDetails)
             ret = True if not ret else ret[1]
             if ret:
                 logger.write('{} created: {}'.format(self.name, ret))
                 if self.settings('notifications.duration') == 'true':
                     if self.settings('notifications.duration.unit') == self.language(30040):
-                        rTimeout = aTimeout - int(self.settings('notifications.duration.value'))
+                        rTimeout = timeout - int(self.settings('notifications.duration.value'))
                     elif self.settings('notifications.duration.unit') == self.language(30041):
-                        rTimeout = aTimeout - ((aTimeout * int(self.settings('notifications.duration.value'))) / 100)
-                    xbmc.executebuiltin('XBMC.AlarmClock({0}, "Notification({0}, {1})", "{2}:00", silent)'.format(self.friendly, self.language(32071).format('{} {}'.format(aTimeout - rTimeout, self.language(32073))), rTimeout))
-                if extend:
-                    ret = aTimeout - int(extend)
+                        rTimeout = timeout - ((timeout * int(self.settings('notifications.duration.value'))) / 100)
+                    xbmc.executebuiltin('XBMC.AlarmClock({0}, "Notification({0}, {1})", "{2}:00", silent)'.format(self.friendly, self.language(32071).format('{} {}'.format(timeout - rTimeout, self.language(32073))), rTimeout))
         else:
-            action = 'Extending' if extend else 'Setting'
-            logger.write('User cancelled {} {}'.format(action.lower(), self.friendly))
             ret = False
         return ret
 
+    ######################################################################
+    #    Aim:        To stop the timer from running
+    #    Params:     notify - stop notifications showing
+    #    Returns:    N/A
+    ######################################################################
     def cancel(self, notify=True):
         logger.write('Cancelling {}'.format(self.name))
         timer = AlarmStore.get(self.name)
@@ -108,27 +149,27 @@ class Alarm:
             if timer and self.settings('notifications.cancel') == 'true': xbmcgui.Dialog().notification(timer['friendly'], '{} {}'.format(timer['friendly'], self.language(32076)))
         AlarmStore.unset(self.name)
 
-    def edit(self):
-        logger.write('Showing edit choices')
-        actions = [self.language(32077), self.language(32078)]
-        sel = xbmcgui.Dialog().select(self.language(32999).format(self.friendly), actions)
-        logger.write('Edit action: {}'.format(sel))
-        if sel == 0: # cancel
-            self.cancel()
-        elif sel == 1: # extend
-            self.extend()
+    ######################################################################
+    #    Aim:        To extend the timer by the given amount
+    #    Params:     extendby - the number of minutes to extend the timer
+    #    Returns:    N/A
+    ######################################################################
+    def extend(self, extendby=0):
+        if extendby:
+            logger.write('Extending {}'.format(self.friendly))
+            timeLeft = self.getTimeLeft()
+            if timeLeft:
+                self.cancel(notify=False)
+                if self.set(timeout=(timeLeft / 60), extend=extendby):
+                    if self.settings('notifications.extend') == 'true':
+                        xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32079), extendby, self.language(32073)))
+                    logger.write('Extended {} by {}'.format(self.friendly, extendby))
 
-    def extend(self):
-        logger.write('Extending {}'.format(self.friendly))
-        timeLeft = self.getTimeLeft()
-        if timeLeft:
-            self.cancel(notify=False)
-            extendedby = self.set(extend=(timeLeft / 60))
-            if extendedby:
-                if self.settings('notifications.extend') == 'true':
-                    xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32079), extendedby, self.language(32073)))
-                logger.write('Extended {} by {}'.format(self.friendly, extendedby))
-
+    ######################################################################
+    #    Aim:        To determine if the timer is already set
+    #    Params:     log - False if you don't want the logging to happen
+    #    Returns:    True/False
+    ######################################################################
     def isSet(self, log=True):
         if log: logger.write('Checking for {}'.format(self.name))
         timer = AlarmStore.get(self.name)
@@ -136,6 +177,10 @@ class Alarm:
         if log: logger.write('{} exists: {}'.format(self.name, ret))
         return ret
 
+    ######################################################################
+    #    Aim:        To retrieve how long the timer has left to run
+    #    Returns:    The number of seconds that the timer has left
+    ######################################################################
     def getTimeLeft(self):
         ret = None
         logger.write('Checking time left on {}'.format(self.name))
@@ -146,6 +191,10 @@ class Alarm:
                 logger.write('{} has {} seconds left'.format(self.name, ret))
         return ret
 
+    ######################################################################
+    #    Aim:        To carry out the actions when the timer has expired
+    #    Returns:    N/A
+    ######################################################################
     def expired(self):
         logger.write('{} has expired'.format(self.name))
         self._doAction()
