@@ -28,7 +28,7 @@ if __name__ == "__main__":
                         aUnits = language(32073)
                     else:
                         aUnits = language(32074)
-                    ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format('{} {}'.format(aRemaining, aUnits)), nolabel=language(32998), yeslabel=language(32999))
-                    if ans: alarm.cancel()
+                    ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format('{} {}'.format(aRemaining, aUnits)), nolabel=language(32998), yeslabel=language(32999).format(alarm.friendly))
+                    if ans: alarm.edit()
             elif action == 'expired':
                 alarm.expired()
