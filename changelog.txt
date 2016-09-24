@@ -1,3 +1,8 @@
+[B]Version 0.0.14[/B]
+- New: Can now select to have the timer to expire after currently playing item
+- New: General section created to decide whether or not the timer should always be of Custom type
+- Info: Skipped the unlucky 13 version
+
 [B]Version 0.0.12[/B]
 - New: Timer can now be extended if necessary
 - New: Add-on setting to control if a notification should be shown when extending the timer
