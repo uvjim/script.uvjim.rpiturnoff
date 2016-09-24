@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
+    <category label="30200">
+        <setting label="30201" type="bool" id="general.timertype" default="true" />
+    </category>
     <category label="30000">
         <setting label="30001" type="bool" id="notifications.start" default="true" />
         <setting label="30002" type="bool" id="notifications.cancel" default="true" />
