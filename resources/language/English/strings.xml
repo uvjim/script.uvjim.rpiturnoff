@@ -19,6 +19,10 @@
 	<string id="30102">Return to</string>
 	<string id="30103">Wait for screensaver</string>
 
+	<!-- General -->
+	<string id="30200">General</string>
+	<string id="30201">Prompt timer type</string>
+
 	<!-- Dialogs -->
 	<string id="32070">Sleep timer</string>
 	<string id="32071">{} left for timer</string>
@@ -30,6 +34,9 @@
 	<string id="32077">Turn off</string>
 	<string id="32078">Extend</string>
 	<string id="32079">Extended by</string>
+	<string id="32080">Select timer type</string>
+	<string id="32081">Custom</string>
+	<string id="32082">After current playing item</string>
 
 	<!-- Miscellaneous Strings -->
 	<string id="32998">OK</string>
