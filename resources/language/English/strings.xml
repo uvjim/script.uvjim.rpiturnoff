@@ -26,8 +26,11 @@
 	<string id="32074">seconds</string>
 	<string id="32075">Set for</string>
 	<string id="32076">has been cancelled</string>
+	<string id="32077">Turn off</string>
+	<string id="32078">Extend</string>
+	<string id="32079">Extended by</string>
 
 	<!-- Miscellaneous Strings -->
 	<string id="32998">OK</string>
-	<string id="32999">Cancel Alarm</string>
+	<string id="32999">Edit {}</string>
 </strings>
