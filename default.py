@@ -26,6 +26,21 @@ def getCurrentItemTimeout():
     return ret
 
 ####################################################################
+#    Aim:        To determine if the timer can be set based on the
+#                amount of time left for the currently playing item
+#    Returns:    Boolean - True/False
+#    Notes:      Displays a notification if the alarm cannot be set
+####################################################################
+def validateCurrentItemTimeout(timeout):
+    # global settings, language
+    ret = True
+    if timeout <= int(settings('general.aftercurrentitem.value')):
+        ret = False
+        xbmcgui.Dialog().notification(language(32070), language(32083).format(language(32084).format(settings('general.aftercurrentitem.value'))), icon=xbmcgui.NOTIFICATION_WARNING)
+    logger.write('validateCurrentItemTimeout: {}'.format(ret))
+    return ret
+
+####################################################################
 #    Main processing
 ####################################################################
 if __name__ == "__main__":
@@ -53,7 +68,11 @@ if __name__ == "__main__":
                         timeout = promptTimeout()
                     elif timertype == 1:
                         timeout = getCurrentItemTimeout()
-                    if timertype >= 0 and timeout: alarm.set(timeout=timeout)
+                    if timertype >= 0 and timeout:
+                        proceed = True
+                        if timertype == 1:
+                            proceed = validateCurrentItemTimeout(timeout)
+                        if proceed: alarm.set(timeout=timeout)
                 else: # there is a timer so let's get details for it
                     aRemaining = alarm.getTimeLeft()
                     aMins = aRemaining / 60
@@ -81,6 +100,8 @@ if __name__ == "__main__":
                             timeout = getCurrentItemTimeout()
                             if timeout:
                                 alarm.cancel(notify=False)
-                                alarm.set(timeout=timeout)
+                                proceed = validateCurrentItemTimeout(timeout)
+                                if proceed:
+                                    alarm.set(timeout=timeout)
             elif action == 'expired': # expire the timer
                 alarm.expired()
