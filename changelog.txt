@@ -1,3 +1,7 @@
+[B]Version 0.0.15[/B]
+- New: Added the ability to stop the timer being created after the current playing item if that item has less than the configured number of minutes left
+- New: Increased the accuracy/precision of the timer displayed when seeing how long is left
+
 [B]Version 0.0.14[/B]
 - New: Can now select to have the timer to expire after currently playing item
 - New: General section created to decide whether or not the timer should always be of Custom type
