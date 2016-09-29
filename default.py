@@ -56,13 +56,17 @@ if __name__ == "__main__":
                     if timertype >= 0 and timeout: alarm.set(timeout=timeout)
                 else: # there is a timer so let's get details for it
                     aRemaining = alarm.getTimeLeft()
-                    if aRemaining > 60:
+                    aMins = aRemaining / 60
+                    aSeconds = aRemaining % 60
+                    msg = ""
+                    if aMins:
                         aRemaining = int(aRemaining / 60)
-                        aUnits = language(32073)
-                    else:
-                        aUnits = language(32074)
+                        msg += "{} {}".format(aMins, language(32073))
+                    if aSeconds:
+                        if msg: msg += " "
+                        msg += "{} {}".format(aSeconds, language(32074))
                     # display time left and prompt for actions
-                    ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format('{} {}'.format(aRemaining, aUnits)), nolabel=language(32998), yeslabel=language(32999).format(alarm.friendly))
+                    ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format(msg), nolabel=language(32998), yeslabel=language(32999).format(alarm.friendly))
                     if ans: # need to take an action
                         logger.write('Showing edit choices')
                         actions = [language(32077), language(32078), language(32082)]
