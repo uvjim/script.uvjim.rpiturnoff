@@ -73,7 +73,7 @@ class AlarmStore:
             AlarmStore.Location.clearProperty(AlarmStore.PropertyName)
 
 class Alarm(object):
-    ReminderSuffix = '-reminder'
+    ReminderSuffix = '.reminder'
 
     ######################################################################
     #    Aim:        To intialise the basic details of the timer
@@ -130,7 +130,7 @@ class Alarm(object):
                         rTimeout = timeout - int(self.settings('notifications.duration.value'))
                     elif self.settings('notifications.duration.unit') == self.language(30041):
                         rTimeout = timeout - ((timeout * int(self.settings('notifications.duration.value'))) / 100)
-                    xbmc.executebuiltin('XBMC.AlarmClock({0}, "Notification({0}, {1})", "{2}:00", silent)'.format(self.friendly, self.language(32071).format('{} {}'.format(timeout - rTimeout, self.language(32073))), rTimeout))
+                    xbmc.executebuiltin('XBMC.AlarmClock({}, "Notification({}, {})", "{}:00", silent)'.format(remindername, self.friendly, self.language(32071).format('{} {}'.format(timeout - rTimeout, self.language(32073))), rTimeout))
         else:
             ret = False
         return ret
