@@ -1,3 +1,6 @@
+[B]Version 0.0.16[/B]
+- Fix: The remainder reminder is now also cancelled when the alarm is cancelled
+
 [B]Version 0.0.15[/B]
 - New: Added the ability to stop the timer being created after the current playing item if that item has less than the configured number of minutes left
 - New: Increased the accuracy/precision of the timer displayed when seeing how long is left
