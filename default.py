@@ -12,6 +12,10 @@ import resources.lib.logger as logger
 def promptTimeout():
     return xbmcgui.Dialog().input(language(32072), type=xbmcgui.INPUT_NUMERIC)
 
+####################################################################
+#    Aim:        To convert a time string into seconds
+#    Returns:    The number of seconds
+####################################################################
 def getTimeInSeconds(time):
     ret = None
     time = time.split(":")
@@ -21,6 +25,11 @@ def getTimeInSeconds(time):
         ret = (int(time[0]) * 60) + int(time[1]) + 1
     return ret
 
+####################################################################
+#    Aim:        To retrieve the amount of remaining time of the
+#                currently playing item (in seconds)
+#    Returns:    The reminaing time of the current item in seconds
+####################################################################
 def getCurrentItemTimeout():
     ret = None
     timeout = xbmc.getInfoLabel('Player.TimeRemaining')
@@ -30,6 +39,11 @@ def getCurrentItemTimeout():
         logger.write("getCurrentTimeout: {}".format(ret))
     return ret
 
+####################################################################
+#    Aim:        To retrieve the amount of remaining time of the
+#                next programmed (PVR) item (in seconds)
+#    Returns:    The reminaing time of the next programme in seconds
+####################################################################
 def getNextProgrammeTimeout():
     ret = None
     logger.write("getNextProgrammeTimeout: Started")
@@ -41,6 +55,11 @@ def getNextProgrammeTimeout():
     logger.write("getNextProgrammeTimeout: Finished - {}".format(ret))
     return ret
 
+####################################################################
+#    Aim:        To build the items to be shown to the user for
+#                timer types
+#    Returns:    A list containing the available timer types
+####################################################################
 def getTimerTypeOptions():
     ret = [language(32081), language(32082)]
     if xbmc.Player().isPlayingVideo(): #check if playing video (we may need to put additional options in)
