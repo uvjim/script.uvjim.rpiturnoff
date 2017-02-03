@@ -51,7 +51,7 @@ if __name__ == "__main__":
         action = args.get('action', '')
         if action != '': action = action[0]
 
-    if action == '': # open the settings as  the default action 
+    if action == '': # open the settings as  the default action
         xbmcaddon.Addon().openSettings()
     else:
         language = xbmcaddon.Addon().getLocalizedString
@@ -72,6 +72,8 @@ if __name__ == "__main__":
                         proceed = True
                         if timertype == 1:
                             proceed = validateCurrentItemTimeout(timeout)
+                        if settings('general.aftercurrentitem.buffer'):
+                            timeout += int(settings('general.aftercurrentitem.buffer'))
                         if proceed: alarm.set(timeout=timeout)
                 else: # there is a timer so let's get details for it
                     aRemaining = alarm.getTimeLeft()
