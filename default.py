@@ -12,17 +12,41 @@ import resources.lib.logger as logger
 def promptTimeout():
     return xbmcgui.Dialog().input(language(32072), type=xbmcgui.INPUT_NUMERIC)
 
+def getTimeInSeconds(time):
+    ret = None
+    time = time.split(":")
+    if len(time) == 2:
+        ret = int(time[0]) + 1
+    elif len(time) == 3:
+        ret = (int(time[0]) * 60) + int(time[1]) + 1
+    return ret
+
 def getCurrentItemTimeout():
     ret = None
     timeout = xbmc.getInfoLabel('Player.TimeRemaining')
     if timeout:
         logger.write("getCurrentTimeout: {}".format(timeout))
-        timeout = timeout.split(":")
-        if len(timeout) == 2:
-            ret = int(timeout[0]) + 1
-        elif len(timeout) == 3:
-            ret = (int(timeout[0]) * 60) + int(timeout[1]) + 1
+        ret = getTimeInSeconds(timeout)
         logger.write("getCurrentTimeout: {}".format(ret))
+    return ret
+
+def getNextProgrammeTimeout():
+    ret = None
+    logger.write("getNextProgrammeTimeout: Started")
+    timeout = xbmc.getInfoLabel('VideoPlayer.NextDuration')
+    if timeout:
+        logger.write("getNextProgrammeTimeout: {}".format(timeout))
+        ciTimeout = getCurrentItemTimeout()
+        ret = getTimeInSeconds(timeout) + ciTimeout
+    logger.write("getNextProgrammeTimeout: Finished - {}".format(ret))
+    return ret
+
+def getTimerTypeOptions():
+    ret = [language(32081), language(32082)]
+    if xbmc.Player().isPlayingVideo(): #check if playing video (we may need to put additional options in)
+        videoType = xbmc.Player().getPlayingFile().lower()
+        if videoType.startswith('pvr://'):
+            ret.append(language(32085))
     return ret
 
 ####################################################################
@@ -62,12 +86,14 @@ if __name__ == "__main__":
                 if not alarm.isSet(): # no timer is set so let's create one
                     timertype = 0
                     if settings('general.timertype') == 'true': # let's workout the timer type
-                        types = [language(32081), language(32082)]
+                        types = getTimerTypeOptions()
                         timertype = xbmcgui.Dialog().select(language(32080), types)
                     if timertype == 0:
                         timeout = promptTimeout()
                     elif timertype == 1:
                         timeout = getCurrentItemTimeout()
+                    elif timertype == 2:
+                        timeout = getNextProgrammeTimeout()
                     if timertype >= 0 and timeout:
                         proceed = True
                         if timertype == 1:
@@ -90,7 +116,8 @@ if __name__ == "__main__":
                     ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format(msg), nolabel=language(32998), yeslabel=language(32999).format(alarm.friendly))
                     if ans: # need to take an action
                         logger.write('Showing edit choices')
-                        actions = [language(32077), language(32078), language(32082)]
+                        actions = getTimerTypeOptions()
+                        actions.insert(0, language(32077))
                         sel = xbmcgui.Dialog().select(language(32999).format(alarm.friendly), actions)
                         logger.write('Edit action: {}'.format(sel))
                         if sel == 0: # cancel timer
