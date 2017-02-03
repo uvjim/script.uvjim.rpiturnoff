@@ -3,7 +3,8 @@
     <category label="30200">
         <setting label="30201" type="bool" id="general.timertype" default="true" />
         <setting label="32082" type="lsep" />
-        <setting label="30202" subsetting="true" type="number" id="general.aftercurrentitem.value" default="5" enable="eq(-2,true)" />
+        <setting label="30202" subsetting="true" type="number" id="general.aftercurrentitem.value" default="5" />
+        <setting label="30203" subsetting="true" type="number" id="general.aftercurrentitem.buffer" default="5" />
     </category>
     <category label="30000">
         <setting label="30001" type="bool" id="notifications.start" default="true" />
