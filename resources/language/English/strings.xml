@@ -23,6 +23,7 @@
 	<string id="30200">General</string>
 	<string id="30201">Prompt timer type</string>
 	<string id="30202">Don't set if x mins left</string>
+	<string id="30203">Add x minutes to the timer</string>
 
 	<!-- Dialogs -->
 	<string id="32070">Sleep timer</string>
