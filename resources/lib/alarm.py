@@ -79,7 +79,7 @@ class Alarm(object):
     #    Aim:        To intialise the basic details of the timer
     #    Params:     name - the name of the timer
     #                friendly - text used to display anything about the
-    #                           timer 
+    #                           timer
     #    Returns:    N/A
     ######################################################################
     def __init__(self, name, friendly):
@@ -87,6 +87,14 @@ class Alarm(object):
         self.friendly = friendly
         self.settings = xbmcaddon.Addon().getSetting
         self.language = xbmcaddon.Addon().getLocalizedString
+
+
+    def _secondsToHHMMSS(self, seconds):
+        hours = seconds // (60*60)
+        seconds %= (60*60)
+        minutes = seconds // 60
+        seconds %= 60
+        return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
     ######################################################################
     #    Aim:        To carry out the actions configured for when the
@@ -107,30 +115,29 @@ class Alarm(object):
 
     ######################################################################
     #    Aim:        To create or extend the timer
-    #    Params:     timeout - the duration of the timer in minutes
+    #    Params:     timeout - the duration of the timer in seconds
     #                extend - the amount to extend the timer by
     #    Returns:    True/False
     ######################################################################
     def set(self, timeout=0, extend=0):
         ret = None
         if timeout:
-            timeout = int(timeout) + int(extend)
             remindername = '{}{}'.format(self.name, Alarm.ReminderSuffix)
             logger.write('Setting {} for {} minutes'.format(self.name, timeout))
-            xbmc.executebuiltin('XBMC.AlarmClock({0}, XBMC.RunScript("{1}", "action=expired&name={0}"), "{2}:00", silent)'.format(self.name, xbmcaddon.Addon().getAddonInfo('id'), timeout))
+            xbmc.executebuiltin('XBMC.AlarmClock({0}, XBMC.RunScript("{1}", "action=expired&name={0}"), "{2}", silent)'.format(self.name, xbmcaddon.Addon().getAddonInfo('id'), self._secondsToHHMMSS(timeout)))
             if self.settings('notifications.start') == 'true' and extend == 0:
-                xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32075), timeout, self.language(32073)))
-            aDetails = {'name': self.name, 'reminder': remindername, 'friendly': self.friendly, 'start': int(time.time()), 'timeout': timeout * 60}
+                xbmcgui.Dialog().notification(self.friendly, '{} {} {}'.format(self.language(32075), divmod(timeout, 60)[0], self.language(32073)))
+            aDetails = {'name': self.name, 'reminder': remindername, 'friendly': self.friendly, 'start': int(time.time()), 'timeout': timeout}
             ret = AlarmStore.set(aDetails)
             ret = True if not ret else ret[1]
             if ret:
                 logger.write('{} created: {}'.format(self.name, ret))
                 if self.settings('notifications.duration') == 'true':
                     if self.settings('notifications.duration.unit') == self.language(30040):
-                        rTimeout = timeout - int(self.settings('notifications.duration.value'))
+                        rTimeout = timeout - (int(self.settings('notifications.duration.value')) * 60)
                     elif self.settings('notifications.duration.unit') == self.language(30041):
                         rTimeout = timeout - ((timeout * int(self.settings('notifications.duration.value'))) / 100)
-                    xbmc.executebuiltin('XBMC.AlarmClock({}, "Notification({}, {})", "{}:00", silent)'.format(remindername, self.friendly, self.language(32071).format('{} {}'.format(timeout - rTimeout, self.language(32073))), rTimeout))
+                    xbmc.executebuiltin('XBMC.AlarmClock({}, "Notification({}, {})", "{}", silent)'.format(remindername, self.friendly, self.language(32071).format('{} {}'.format(divmod(timeout - rTimeout, 60)[0], self.language(32073))), self._secondsToHHMMSS(rTimeout)))
         else:
             ret = False
         return ret
