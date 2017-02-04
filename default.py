@@ -57,26 +57,31 @@ def getNextProgrammeTimeout():
 #    Returns:    A list containing the available timer types
 ####################################################################
 def getTimerTypeOptions():
+    ret = []
     playlist = None
-    logger.write("getTimerTypeOptions: Started", xbmc.LOGWARNING)
-    ret = [language(32081), language(32082)]
+    logger.write("getTimerTypeOptions: Started")
+    if alarm.isSet():
+        ret.extend([language(32077), language(32078)])
+    else:
+        ret.append(language(32081))
+    ret.append(language(32082))
     if xbmc.Player().isPlayingVideo(): #check if playing video (we may need to put additional options in)
         videoType = xbmc.Player().getPlayingFile().lower()
         if videoType.startswith('pvr://'):
-            logger.write("getTimerTypeOptions: PVR playing", xbmc.LOGWARNING)
+            logger.write("getTimerTypeOptions: PVR playing")
             ret.append(language(32085))
         else:
-            logger.write("getTimerTypeOptions: Checking video playlist", xbmc.LOGWARNING)
+            logger.write("getTimerTypeOptions: Checking video playlist")
             playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     elif xbmc.Player().isPlayingAudio():
-        logger.write("getTimerTypeOptions: Checking music playlist", xbmc.LOGWARNING)
+        logger.write("getTimerTypeOptions: Checking music playlist")
         playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
     if playlist:
         plPos = playlist.getposition()
-        logger.write("getTimerTypeOptions: Playlist position: {}".format(plPos), xbmc.LOGWARNING)
+        logger.write("getTimerTypeOptions: Playlist position: {}".format(plPos))
         if plPos != '': #we've got a playlist and it is being played (idx starts 1)
             ret.append(language(32086))
-    logger.write("getTimerTypeOptions: Finished - {}".format(ret), xbmc.LOGWARNING)
+    logger.write("getTimerTypeOptions: Finished - {}".format(ret))
     return ret
 
 ####################################################################
@@ -86,7 +91,6 @@ def getTimerTypeOptions():
 #    Notes:      Displays a notification if the alarm cannot be set
 ####################################################################
 def validateCurrentItemTimeout(timeout):
-    # global settings, language
     ret = True
     if timeout <= int(settings('general.aftercurrentitem.value')):
         ret = False
@@ -95,10 +99,43 @@ def validateCurrentItemTimeout(timeout):
     return ret
 
 ####################################################################
+#    Aim:        To process the timer type options
+#    Returns:    N/A
+####################################################################
+def doTimerType(timertype):
+    ret = None
+    timeout = None
+    if alarm.isSet() and timertype != language(32077):
+        alarm.cancel(notify=False)
+    if timertype == language(32081): # custom
+        timeout = promptTimeout()
+        if timeout: timeout = int(timeout) * 60
+    elif timertype == language(32082): # after current item
+        timeout = getCurrentItemTimeout()
+        timeout = timeout if validateCurrentItemTimeout(timeout) else None
+    elif timertype == language(32085): # after next programme
+        timeout = getNextProgrammeTimeout()
+    elif timertype == language(32077): # turn off
+        alarm.cancel()
+    elif timertype == language(32078): # extend
+        extendby = promptTimeout()
+        if extendby:
+            extendby = int(extendby) * 60
+            alarm.extend(extendby)
+
+    if timeout:
+        if timertype == language(32082) or timertype == language(32085):
+            if settings('general.aftercurrentitem.buffer'):
+                timeout += int(settings('general.aftercurrentitem.buffer'))
+        alarm.set(timeout=timeout)
+
+    return ret
+
+####################################################################
 #    Main processing
 ####################################################################
 if __name__ == "__main__":
-    logger.write('Arguments: {}'.format(sys.argv))
+    logger.write('Main: Arguments: {}'.format(sys.argv))
     action = ''
     if len(sys.argv) > 1: # split up the arguments
         args = urlparse.parse_qs(sys.argv[1])
@@ -119,21 +156,8 @@ if __name__ == "__main__":
                         types = getTimerTypeOptions()
                         timertype = xbmcgui.Dialog().select(language(32080), types)
                     if timertype >= 0:
-                        proceed = True
-                        logger.write("Main: Timer type selected: {} - {}".format(timertype, types[timertype]), xbmc.LOGWARNING)
-                        if types[timertype] == language(32081):
-                            timeout = promptTimeout()
-                            if timeout: timeout = int(timeout) * 60
-                        elif types[timertype] == language(32082):
-                            timeout = getCurrentItemTimeout()
-                            proceed = validateCurrentItemTimeout(timeout)
-                        elif types[timertype] == language(32085):
-                            timeout = getNextProgrammeTimeout()
-                        if timeout:
-                            if types[timertype] == language(32082) or types[timertype] == language(32085):
-                                if settings('general.aftercurrentitem.buffer'):
-                                    timeout += int(settings('general.aftercurrentitem.buffer'))
-                            if proceed: alarm.set(timeout=timeout)
+                        logger.write("Main: Timer type selected: {} - {}".format(timertype, types[timertype]))
+                        doTimerType(types[timertype])
                 else: # there is a timer so let's get details for it
                     aRemaining = alarm.getTimeLeft()
                     aMins = aRemaining / 60
@@ -148,22 +172,10 @@ if __name__ == "__main__":
                     # display time left and prompt for actions
                     ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format(msg), nolabel=language(32998), yeslabel=language(32999).format(alarm.friendly))
                     if ans: # need to take an action
-                        logger.write('Showing edit choices')
                         actions = getTimerTypeOptions()
-                        actions.insert(0, language(32077))
+                        logger.write('Main: Showing edit choices')
                         sel = xbmcgui.Dialog().select(language(32999).format(alarm.friendly), actions)
-                        logger.write('Edit action: {}'.format(sel))
-                        if sel == 0: # cancel timer
-                            alarm.cancel()
-                        elif sel == 1: # extend timer
-                            extendby = promptTimeout()
-                            if extendby: alarm.extend(extendby=extendby)
-                        elif sel == 2: # after current item
-                            timeout = getCurrentItemTimeout()
-                            if timeout:
-                                alarm.cancel(notify=False)
-                                proceed = validateCurrentItemTimeout(timeout)
-                                if proceed:
-                                    alarm.set(timeout=timeout)
+                        logger.write('Main: Edit action selected: {} - {}'.format(sel, actions[sel]))
+                        doTimerType(actions[sel])
             elif action == 'expired': # expire the timer
                 alarm.expired()
