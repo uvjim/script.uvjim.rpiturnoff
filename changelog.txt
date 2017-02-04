@@ -1,3 +1,10 @@
+[B]Version 0.0.17[/B]
+- New: Added the ability to set a timer for the next programmed (PVR)
+- New: Added the ability to set a timer for after the current playlist
+- Fix: Increased accuracy of the internal timers
+- Fix: Better logging
+- Fix: Refactored the timer type selection code
+
 [B]Version 0.0.16[/B]
 - Fix: The remainder reminder is now also cancelled when the alarm is cancelled
 
