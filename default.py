@@ -18,11 +18,7 @@ def promptTimeout():
 ####################################################################
 def getTimeInSeconds(time):
     ret = None
-    time = time.split(":")
-    if len(time) == 2:
-        ret = int(time[0]) + 1
-    elif len(time) == 3:
-        ret = (int(time[0]) * 60) + int(time[1]) + 1
+    ret = sum(int(x) * 60 ** i for i, x in enumerate(reversed(time.split(":"))))
     return ret
 
 ####################################################################
@@ -61,11 +57,26 @@ def getNextProgrammeTimeout():
 #    Returns:    A list containing the available timer types
 ####################################################################
 def getTimerTypeOptions():
+    playlist = None
+    logger.write("getTimerTypeOptions: Started", xbmc.LOGWARNING)
     ret = [language(32081), language(32082)]
     if xbmc.Player().isPlayingVideo(): #check if playing video (we may need to put additional options in)
         videoType = xbmc.Player().getPlayingFile().lower()
         if videoType.startswith('pvr://'):
+            logger.write("getTimerTypeOptions: PVR playing", xbmc.LOGWARNING)
             ret.append(language(32085))
+        else:
+            logger.write("getTimerTypeOptions: Checking video playlist", xbmc.LOGWARNING)
+            playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    elif xbmc.Player().isPlayingAudio():
+        logger.write("getTimerTypeOptions: Checking music playlist", xbmc.LOGWARNING)
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+    if playlist:
+        plPos = playlist.getposition()
+        logger.write("getTimerTypeOptions: Playlist position: {}".format(plPos), xbmc.LOGWARNING)
+        if plPos != '': #we've got a playlist and it is being played (idx starts 1)
+            ret.append(language(32086))
+    logger.write("getTimerTypeOptions: Finished - {}".format(ret), xbmc.LOGWARNING)
     return ret
 
 ####################################################################
@@ -107,19 +118,22 @@ if __name__ == "__main__":
                     if settings('general.timertype') == 'true': # let's workout the timer type
                         types = getTimerTypeOptions()
                         timertype = xbmcgui.Dialog().select(language(32080), types)
-                    if timertype == 0:
-                        timeout = promptTimeout()
-                    elif timertype == 1:
-                        timeout = getCurrentItemTimeout()
-                    elif timertype == 2:
-                        timeout = getNextProgrammeTimeout()
-                    if timertype >= 0 and timeout:
+                    if timertype >= 0:
                         proceed = True
-                        if timertype == 1:
+                        logger.write("Main: Timer type selected: {} - {}".format(timertype, types[timertype]), xbmc.LOGWARNING)
+                        if types[timertype] == language(32081):
+                            timeout = promptTimeout()
+                            if timeout: timeout = int(timeout) * 60
+                        elif types[timertype] == language(32082):
+                            timeout = getCurrentItemTimeout()
                             proceed = validateCurrentItemTimeout(timeout)
-                        if settings('general.aftercurrentitem.buffer'):
-                            timeout += int(settings('general.aftercurrentitem.buffer'))
-                        if proceed: alarm.set(timeout=timeout)
+                        elif types[timertype] == language(32085):
+                            timeout = getNextProgrammeTimeout()
+                        if timeout:
+                            if types[timertype] == language(32082) or types[timertype] == language(32085):
+                                if settings('general.aftercurrentitem.buffer'):
+                                    timeout += int(settings('general.aftercurrentitem.buffer'))
+                            if proceed: alarm.set(timeout=timeout)
                 else: # there is a timer so let's get details for it
                     aRemaining = alarm.getTimeLeft()
                     aMins = aRemaining / 60
