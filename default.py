@@ -1,5 +1,6 @@
 ﻿import sys
 import urlparse
+import json
 import xbmcgui, xbmcaddon
 from resources.lib.alarm import Alarm
 import resources.lib.logger as logger
@@ -30,9 +31,9 @@ def getCurrentItemTimeout():
     ret = None
     timeout = xbmc.getInfoLabel('Player.TimeRemaining')
     if timeout:
-        logger.write("getCurrentTimeout: {}".format(timeout))
+        logger.write("getCurrentTimeout: Raw: {}".format(timeout))
         ret = getTimeInSeconds(timeout)
-        logger.write("getCurrentTimeout: {}".format(ret))
+        logger.write("getCurrentTimeout: Seconds: {}".format(ret))
     return ret
 
 ####################################################################
@@ -52,6 +53,56 @@ def getNextProgrammeTimeout():
     return ret
 
 ####################################################################
+#    Aim:        To retrieve the amount of remaining time for the
+#                playlist (or time until the given playlist item)
+#    Returns:    The reminaing time in seconds
+####################################################################
+def getPlaylistTimeout(afterPos=0):
+    ret = None
+    playlist = None
+    logger.write("getPlaylistTimeout: Started")
+    if xbmc.Player().isPlayingVideo():
+        logger.write("getPlaylistTimeout: Checking video playlist")
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    elif xbmc.Player().isPlayingAudio():
+        logger.write("getPlaylistTimeout: Checking music playlist")
+        playlist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
+    if playlist:
+        curPos = playlist.getposition()
+        logger.write("getPlaylistTimeout: Current position: {}".format(curPos))
+        if curPos != '':
+            afterPos = afterPos if afterPos else playlist.size()
+            logger.write("getPlaylistTimeout: Start idx: {}, End idx: {}".format(curPos, afterPos))
+            ret = 0
+            logger.write("getPlaylistTimeout: Executing JSON-RPC for playlist details")
+            jsonDetails = {
+                "id": "{}-getPlaylistTimeout".format(xbmcaddon.Addon().getAddonInfo('id')),
+                "jsonrpc": "2.0",
+                "method": "Playlist.GetItems",
+                "params": {
+                    "playlistid": playlist.getPlayListId(),
+                    "properties": [
+                        "duration"
+                    ],
+                    "limits": {
+                        "start": curPos
+                    }
+                }
+            }
+            playlist = xbmc.executeJSONRPC(json.dumps(jsonDetails))
+            logger.write("getPlaylistTimeout: Playlist details: {}".format(playlist))
+            playlist = json.loads(playlist)['result']['items']
+            for idx, itm in enumerate(playlist):
+                duration = int(itm['duration'])
+                if idx == 0: duration = duration - getTimeInSeconds(xbmc.getInfoLabel('Player.Time'))
+                logger.write("getPlaylistTimeout: idx {} duration: {} ({})".format(idx + curPos, duration, itm['duration']))
+                ret += duration
+        else:
+            logger.write("getPlaylistTimeout: Playlist not playing")
+    logger.write("getPlaylistTimeout: Finished - {}".format(ret))
+    return ret
+
+####################################################################
 #    Aim:        To build the items to be shown to the user for
 #                timer types
 #    Returns:    A list containing the available timer types
@@ -65,7 +116,7 @@ def getTimerTypeOptions():
     else:
         ret.append(language(32081))
     ret.append(language(32082))
-    if xbmc.Player().isPlayingVideo(): #check if playing video (we may need to put additional options in)
+    if xbmc.Player().isPlayingVideo(): # check if playing video (we may need to put additional options in)
         videoType = xbmc.Player().getPlayingFile().lower()
         if videoType.startswith('pvr://'):
             logger.write("getTimerTypeOptions: PVR playing")
@@ -79,8 +130,8 @@ def getTimerTypeOptions():
     if playlist:
         plPos = playlist.getposition()
         logger.write("getTimerTypeOptions: Playlist position: {}".format(plPos))
-        if plPos != '': #we've got a playlist and it is being played (idx starts 1)
-            ret.append(language(32086))
+        if plPos != '': # we've got a playlist and it is being played (idx starts 1)
+            ret.extend([language(32086)])
     logger.write("getTimerTypeOptions: Finished - {}".format(ret))
     return ret
 
@@ -92,7 +143,7 @@ def getTimerTypeOptions():
 ####################################################################
 def validateCurrentItemTimeout(timeout):
     ret = True
-    if timeout <= int(settings('general.aftercurrentitem.value')):
+    if timeout <= int(settings('general.aftercurrentitem.value')) * 60:
         ret = False
         xbmcgui.Dialog().notification(language(32070), language(32083).format(language(32084).format(settings('general.aftercurrentitem.value'))), icon=xbmcgui.NOTIFICATION_WARNING)
     logger.write('validateCurrentItemTimeout: {}'.format(ret))
@@ -115,6 +166,8 @@ def doTimerType(timertype):
         timeout = timeout if validateCurrentItemTimeout(timeout) else None
     elif timertype == language(32085): # after next programme
         timeout = getNextProgrammeTimeout()
+    elif timertype == language(32086): # after playlist
+        timeout = getPlaylistTimeout()
     elif timertype == language(32077): # turn off
         alarm.cancel()
     elif timertype == language(32078): # extend
@@ -148,34 +201,35 @@ if __name__ == "__main__":
         language = xbmcaddon.Addon().getLocalizedString
         settings = xbmcaddon.Addon().getSetting
         alarm = Alarm(name='uvjim.rpiturnoff', friendly=language(32070))
-        if xbmc.Player().isPlaying(): # only do something if the Player is playing something
-            if action == 'queryset':
-                if not alarm.isSet(): # no timer is set so let's create one
-                    timertype = 0
-                    if settings('general.timertype') == 'true': # let's workout the timer type
-                        types = getTimerTypeOptions()
-                        timertype = xbmcgui.Dialog().select(language(32080), types)
-                    if timertype >= 0:
-                        logger.write("Main: Timer type selected: {} - {}".format(timertype, types[timertype]))
-                        doTimerType(types[timertype])
-                else: # there is a timer so let's get details for it
-                    aRemaining = alarm.getTimeLeft()
-                    aMins = aRemaining / 60
-                    aSeconds = aRemaining % 60
-                    msg = ""
-                    if aMins:
-                        aRemaining = int(aRemaining / 60)
-                        msg += "{} {}".format(aMins, language(32073))
-                    if aSeconds:
-                        if msg: msg += " "
-                        msg += "{} {}".format(aSeconds, language(32074))
-                    # display time left and prompt for actions
-                    ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format(msg), nolabel=language(32998), yeslabel=language(32999).format(alarm.friendly))
-                    if ans: # need to take an action
-                        actions = getTimerTypeOptions()
-                        logger.write('Main: Showing edit choices')
-                        sel = xbmcgui.Dialog().select(language(32999).format(alarm.friendly), actions)
-                        logger.write('Main: Edit action selected: {} - {}'.format(sel, actions[sel]))
-                        doTimerType(actions[sel])
-            elif action == 'expired': # expire the timer
-                alarm.expired()
+        if action == 'expired': # expire the timer
+            alarm.expired()
+        else:
+            if xbmc.Player().isPlaying(): # only do something if the Player is playing something
+                if action == 'queryset':
+                    if not alarm.isSet(): # no timer is set so let's create one
+                        timertype = 0
+                        if settings('general.timertype') == 'true': # let's workout the timer type
+                            types = getTimerTypeOptions()
+                            timertype = xbmcgui.Dialog().select(language(32080), types)
+                        if timertype >= 0:
+                            logger.write("Main: Timer type selected: {} - {}".format(timertype, types[timertype]))
+                            doTimerType(types[timertype])
+                    else: # there is a timer so let's get details for it
+                        aRemaining = alarm.getTimeLeft()
+                        aMins = aRemaining / 60
+                        aSeconds = aRemaining % 60
+                        msg = ""
+                        if aMins:
+                            aRemaining = int(aRemaining / 60)
+                            msg += "{} {}".format(aMins, language(32073))
+                        if aSeconds:
+                            if msg: msg += " "
+                            msg += "{} {}".format(aSeconds, language(32074))
+                        # display time left and prompt for actions
+                        ans = xbmcgui.Dialog().yesno(language(32070), language(32071).format(msg), nolabel=language(32998), yeslabel=language(32999).format(alarm.friendly))
+                        if ans: # need to take an action
+                            actions = getTimerTypeOptions()
+                            logger.write('Main: Showing edit choices')
+                            sel = xbmcgui.Dialog().select(language(32999).format(alarm.friendly), actions)
+                            logger.write('Main: Edit action selected: {} - {}'.format(sel, actions[sel]))
+                            doTimerType(actions[sel])
