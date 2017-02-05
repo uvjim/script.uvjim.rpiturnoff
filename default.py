@@ -179,7 +179,7 @@ def doTimerType(timertype):
     if timeout:
         if timertype == language(32082) or timertype == language(32085):
             if settings('general.aftercurrentitem.buffer'):
-                timeout += int(settings('general.aftercurrentitem.buffer'))
+                timeout += int(settings('general.aftercurrentitem.buffer')) * 60
         alarm.set(timeout=timeout)
 
     return ret
