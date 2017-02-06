@@ -156,7 +156,7 @@ def validateCurrentItemTimeout(timeout):
 def doTimerType(timertype):
     ret = None
     timeout = None
-    if alarm.isSet() and timertype != language(32077):
+    if alarm.isSet() and (timertype != language(32077) and timertype != language(32078)):
         alarm.cancel(notify=False)
     if timertype == language(32081): # custom
         timeout = promptTimeout()
