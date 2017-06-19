@@ -133,7 +133,7 @@ class Alarm(object):
             if ret:
                 logger.write('Alarm.set: {} created: {}'.format(self.name, ret))
                 if self.settings('notifications.duration') == 'true':
-                    if self.settings('notifications.duration.unit') == self.language(30040):
+                    if self.settings('notifications.duration.unit') == self.language(30040) or self.settings('notifications.duration.unit') == '':
                         rTimeout = timeout - (int(self.settings('notifications.duration.value')) * 60)
                     elif self.settings('notifications.duration.unit') == self.language(30041):
                         rTimeout = timeout - ((timeout * int(self.settings('notifications.duration.value'))) / 100)
