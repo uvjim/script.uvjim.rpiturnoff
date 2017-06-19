@@ -1,3 +1,6 @@
+[B]Version 0.0.20[/B]
+- Fix: Issue when setting the reminder notification.
+
 [B]Version 0.0.19[/B]
 - Fix: Extend capability was broken after a little snafu in previous updates
 
