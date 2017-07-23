@@ -231,5 +231,6 @@ if __name__ == "__main__":
                             actions = getTimerTypeOptions()
                             logger.write('Main: Showing edit choices')
                             sel = xbmcgui.Dialog().select(language(32999).format(alarm.friendly), actions)
-                            logger.write('Main: Edit action selected: {} - {}'.format(sel, actions[sel]))
-                            doTimerType(actions[sel])
+                            if sel != -1:
+                                logger.write('Main: Edit action selected: {} - {}'.format(sel, actions[sel]))
+                                doTimerType(actions[sel])
