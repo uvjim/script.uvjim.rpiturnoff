@@ -1,3 +1,6 @@
+[B]Version 0.0.21[/B]
+- Fix: Timer being reset when cancelling a select dialog.
+
 [B]Version 0.0.20[/B]
 - Fix: Issue when setting the reminder notification.
 
